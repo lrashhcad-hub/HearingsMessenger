@@ -135,6 +135,11 @@ It only needs to accept the POST, return 2xx fast, and surface the message.
 
 ## Phase 5 — Build the publisher test app
 
+> **This app already exists** at `src/HearingsMessenger/HearingsMessenger.SendTest`
+> (Debug logging on by default; `--loopback` mode verified, and an end-to-end run against
+> the local agent confirmed the transport targets the right endpoint and logs+swallows a
+> TLS failure — the pitfall above, live). See its README for usage.
+
 - [ ] `dotnet new console -n HearingsMessenger.SendTest`, reference the library
       (project reference or the packed `.nupkg`).
 - [ ] Wire DI + **logging** (remember the pitfall):

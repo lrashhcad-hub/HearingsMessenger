@@ -83,6 +83,7 @@ src/HearingsMessenger/
     *.cs                             ← hub, messages, subscriptions, tokens, error handler
   HearingsMessenger.Tests/           ← MSTest + Moq test suite (60 tests)
   HearingsMessenger.Agent/           ← workstation receiving agent (ASP.NET Core Windows Service)
+  HearingsMessenger.SendTest/        ← publisher CLI for pilot testing (console)
 ```
 
 > Public **type names** keep their `TinyMessenger*` / `TinyMessage*` prefixes on purpose —
