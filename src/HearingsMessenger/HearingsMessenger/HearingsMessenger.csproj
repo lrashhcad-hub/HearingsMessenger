@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Change to net8.0 if targeting the previous LTS. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <AssemblyName>HearingsMessenger</AssemblyName>
+    <RootNamespace>HearingsMessenger</RootNamespace>
+    <Version>2.0.0</Version>
+    <Description>HCAD hearings messaging component: a lightweight event aggregator/messenger (derived from TinyMessenger) extended with a one-way broadcast layer for domain-joined enterprise workstations.</Description>
+    <Authors>Steven Robbins (original TinyMessenger); HCAD Systems (modernization)</Authors>
+    <Copyright>Copyright © Steven Robbins</Copyright>
+    <PackageLicenseFile>licence.txt</PackageLicenseFile>
+    <!-- Upstream origin of the core event-aggregator code: -->
+    <RepositoryUrl>https://github.com/grumpydev/TinyMessenger</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Abstractions only: no container or logging framework is forced on consumers. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../../licence.txt" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>
