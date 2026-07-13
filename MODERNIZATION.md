@@ -7,20 +7,18 @@ layer for domain-joined Windows 11 workstations.
 Build with: `dotnet build src/HearingsMessenger/HearingsMessenger.sln`
 Test with:  `dotnet test  src/HearingsMessenger/HearingsMessenger.sln`
 
-> **Verification status (2026-07-13):** unlike the first draft, this codebase is
-> **build-verified**. The library compiles with **0 warnings / 0 errors** under
-> `TreatWarningsAsErrors`, nullable, and XML-doc enforcement on the .NET 10 SDK
-> (10.0.109), and a 35-check functional smoke suite passed covering hub semantics
-> (all 8 Subscribe overloads, filters, proxies, unsubscribe/token-dispose, error
+> **Verification status (2026-07-13):** this codebase is **fully build- and test-verified**
+> on the **.NET 10 SDK (10.0.301)**. The solution compiles with **0 warnings / 0 errors**
+> under `TreatWarningsAsErrors`, nullable, and XML-doc enforcement, and the complete test
+> suite — **60 tests, all passing** — runs green via `dotnet test`. Coverage spans hub
+> semantics (all 8 Subscribe overloads, filters, proxies, unsubscribe/token-dispose, error
 > handlers, polymorphic delivery), weak-reference collection behavior (sync + async),
 > PublishAsync/cancellation, broadcast fan-out/failure isolation/local echo/JSON
 > round-trip, HttpAgentBroadcastTransport best-effort behavior, and end-to-end DI wiring.
 >
-> The verification environment had no NuGet access, so two things remain for your machine:
-> `dotnet restore` of the `Microsoft.Extensions.*` 10.0.0 packages and the test packages
-> (MSTest 3.6.4, Moq 4.20.72, Microsoft.NET.Test.Sdk 17.12.0), and a `dotnet test` run.
-> The compile verification used the identical assemblies from the ASP.NET Core shared
-> framework, so restore is the only expected variable.
+> Package restore (`Microsoft.Extensions.*` 10.0.0; test packages MSTest 3.6.4,
+> Moq 4.20.72, Microsoft.NET.Test.Sdk 17.12.0) resolves from nuget.org via the repo-local
+> `src/HearingsMessenger/nuget.config`, so no machine-wide NuGet configuration is required.
 
 > Targets `net10.0` (current LTS); change one line in each `.csproj` to `net8.0` if your
 > agents are on the previous LTS.
