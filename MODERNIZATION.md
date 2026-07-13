@@ -174,5 +174,9 @@ logging framework is forced on consumers.
   `Metadata` for ad-hoc data (receiving agents ignore unknown fields).
 - **Two-way needs (acks, targeting queries)**: out of scope by design — build a separate
   request/response service; don't bend the broadcast contract.
-- **Receiving agent**: not included (it's a deployable service, not a library concern);
-  the expected endpoint shape is documented in `HttpAgentBroadcastTransport`.
+- **Receiving agent**: a pilot **scaffold** is now included at
+  `src/HearingsMessenger/HearingsMessenger.Agent` — an ASP.NET Core minimal API hosted as a
+  Windows Service that accepts the POSTs with Negotiate auth and logs them (log-only; a
+  Windows toast is a later phase). It reuses the library's `BroadcastNotification` so the wire
+  contract cannot drift. See `docs/PILOT-TEST-PLAN.md` and the agent's own README. It remains a
+  separately deployable service, not something the library depends on.

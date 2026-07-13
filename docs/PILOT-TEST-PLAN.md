@@ -47,6 +47,11 @@ no idea what happened.** Successful delivery logs at `Debug`; every failure logs
 
 ## Phase 1 — Build the receiving agent (the blocker)
 
+> **A pilot scaffold already exists** at `src/HearingsMessenger/HearingsMessenger.Agent`
+> (log-only, Negotiate auth, verified locally: `/health` → 200, unauthenticated POST → 401,
+> authenticated POST of a real notification → 200). The steps below describe how it was built
+> and what still needs doing (cert binding, the toast in Phase 6.4).
+
 Create a new **ASP.NET Core minimal API** project (net10.0) hosted as a **Windows Service**.
 It only needs to accept the POST, return 2xx fast, and surface the message.
 

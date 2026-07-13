@@ -53,9 +53,11 @@ IBroadcastPublisher.PublishAsync(notification, machineGroup)
 - **`BroadcastPublisher`** — fans out to every registered transport concurrently and never
   throws for delivery failures (honours cancellation).
 
-> **Note:** the workstation-side **receiving agent** is not part of this library — it's a
-> deployable service. `HttpAgentBroadcastTransport` POSTs JSON to an agent endpoint whose
-> expected shape is documented in that file's XML docs and in `MODERNIZATION.md` §2.
+> **Receiving agent:** a **pilot scaffold** now lives at
+> [`src/HearingsMessenger/HearingsMessenger.Agent`](src/HearingsMessenger/HearingsMessenger.Agent)
+> — an ASP.NET Core minimal API (Windows Service) that receives the POSTs with Negotiate auth
+> and logs them (toast is a later phase). `HttpAgentBroadcastTransport` POSTs JSON to that
+> endpoint; the contract is in that file's XML docs and in `MODERNIZATION.md` §2.
 
 ## Dependency injection
 
@@ -80,6 +82,7 @@ src/HearingsMessenger/
     DependencyInjection/             ← AddTinyMessenger / AddTinyMessengerBroadcast
     *.cs                             ← hub, messages, subscriptions, tokens, error handler
   HearingsMessenger.Tests/           ← MSTest + Moq test suite (60 tests)
+  HearingsMessenger.Agent/           ← workstation receiving agent (ASP.NET Core Windows Service)
 ```
 
 > Public **type names** keep their `TinyMessenger*` / `TinyMessage*` prefixes on purpose —
