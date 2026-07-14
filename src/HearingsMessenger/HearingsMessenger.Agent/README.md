@@ -23,8 +23,12 @@ Listens on **`https://+:7443`** by default (matches the transport's `DefaultPort
 | Key | Default | Notes |
 | --- | --- | --- |
 | `Agent:Port` | `7443` | Listen port |
-| `Agent:CertPath` | *(empty)* | PFX whose **SAN = this host's FQDN**. Empty ⇒ ASP.NET **dev cert** (local testing only) |
-| `Agent:CertPassword` | *(empty)* | Supply via user-secrets/env in production, **not** this file |
+| `Agent:CertThumbprint` | *(empty)* | **Preferred.** Thumbprint of a server-auth cert in `LocalMachine\My` (e.g. AD CS-issued). Trusted domain-wide, no private key on disk. **Takes precedence** over `CertPath` |
+| `Agent:CertPath` | *(empty)* | Fallback PFX whose **SAN = this host's FQDN**, used only when `CertThumbprint` is empty. Empty ⇒ ASP.NET **dev cert** (local testing only) |
+| `Agent:CertPassword` | *(empty)* | PFX password; supply via user-secrets/env in production, **not** this file |
+
+Certificate resolution order: **`CertThumbprint` → `CertPath` → dev cert**. The chosen cert must
+have a **Server Authentication** EKU and a SAN matching the host FQDN the publisher targets.
 
 ## Run locally (dev)
 

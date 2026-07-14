@@ -8,6 +8,7 @@
 // Pilot scaffold: log-only. Phase 6.4 of the pilot plan adds a Windows toast.
 //===============================================================================
 
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 using HearingsMessenger.Broadcast;
 using Microsoft.AspNetCore.Authentication.Negotiate;
@@ -19,7 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseWindowsService();
 
 // --- Kestrel: HTTPS on the agent port (default 7443) ---
+// Certificate resolution order: store thumbprint (preferred for AD CS-issued machine
+// certs) -> PFX file -> ASP.NET dev cert (local testing only).
 var port = builder.Configuration.GetValue("Agent:Port", 7443);
+var certThumbprint = builder.Configuration["Agent:CertThumbprint"];
 var certPath = builder.Configuration["Agent:CertPath"];
 var certPassword = builder.Configuration["Agent:CertPassword"];
 
@@ -27,10 +31,16 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(port, listen =>
     {
-        if (!string.IsNullOrWhiteSpace(certPath))
+        if (!string.IsNullOrWhiteSpace(certThumbprint))
         {
-            // Production/pilot: bind the AD CS / internal-CA server certificate.
-            // The certificate's SAN MUST match the host FQDN the publisher targets.
+            // Preferred: an AD CS / internal-CA server certificate already in the machine
+            // store (LocalMachine\My). Trusted domain-wide, no private key exported to disk.
+            // The cert MUST have a Server Authentication EKU and a SAN matching the host FQDN.
+            listen.UseHttps(LoadCertificateByThumbprint(certThumbprint));
+        }
+        else if (!string.IsNullOrWhiteSpace(certPath))
+        {
+            // A PFX file on disk. The certificate's SAN MUST match the host FQDN.
             listen.UseHttps(certPath, certPassword);
         }
         else
@@ -41,6 +51,21 @@ builder.WebHost.ConfigureKestrel(options =>
         }
     });
 });
+
+static X509Certificate2 LoadCertificateByThumbprint(string thumbprint)
+{
+    var normalized = thumbprint.Replace(" ", string.Empty).Trim();
+    using var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+    store.Open(OpenFlags.ReadOnly);
+    var matches = store.Certificates.Find(X509FindType.FindByThumbprint, normalized, validOnly: false);
+    if (matches.Count == 0)
+    {
+        throw new InvalidOperationException(
+            $"No certificate with thumbprint '{normalized}' found in LocalMachine\\My.");
+    }
+
+    return matches[0];
+}
 
 // --- Windows integrated authentication (Kerberos/Negotiate) ---
 builder.Services
