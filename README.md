@@ -6,7 +6,11 @@ hub** (derived from [TinyMessenger](https://github.com/grumpydev/TinyMessenger))
 groups of domain-joined Windows 11 workstations.
 
 > **Status:** builds warning-clean under `TreatWarningsAsErrors` and passes all **60** tests on
-> the .NET 10 SDK. See [`MODERNIZATION.md`](MODERNIZATION.md) for the full modernization record.
+> the .NET 10 SDK. The full pilot (publisher → agent → on-screen notification) has been verified
+> end-to-end on a domain-joined workstation.
+>
+> **Install & usage:** see [`INSTRUCTIONS.md`](INSTRUCTIONS.md). Full modernization record:
+> [`MODERNIZATION.md`](MODERNIZATION.md).
 
 ## Requirements
 
@@ -53,11 +57,11 @@ IBroadcastPublisher.PublishAsync(notification, machineGroup)
 - **`BroadcastPublisher`** — fans out to every registered transport concurrently and never
   throws for delivery failures (honours cancellation).
 
-> **Receiving agent:** a **pilot scaffold** now lives at
-> [`src/HearingsMessenger/HearingsMessenger.Agent`](src/HearingsMessenger/HearingsMessenger.Agent)
-> — an ASP.NET Core minimal API (Windows Service) that receives the POSTs with Negotiate auth
-> and logs them (toast is a later phase). `HttpAgentBroadcastTransport` POSTs JSON to that
-> endpoint; the contract is in that file's XML docs and in `MODERNIZATION.md` §2.
+> **Receiving agent:** [`src/HearingsMessenger/HearingsMessenger.Agent`](src/HearingsMessenger/HearingsMessenger.Agent)
+> — an ASP.NET Core minimal API (Windows Service) that receives the POSTs with Negotiate auth,
+> serves HTTPS from an AD CS server cert, and shows each notification **on-screen** to logged-in
+> users. `HttpAgentBroadcastTransport` POSTs JSON to that endpoint; the contract is in that file's
+> XML docs and in `MODERNIZATION.md` §2.
 
 ## Dependency injection
 

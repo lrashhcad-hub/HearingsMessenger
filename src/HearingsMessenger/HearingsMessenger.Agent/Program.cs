@@ -8,6 +8,7 @@
 // Pilot scaffold: log-only. Phase 6.4 of the pilot plan adds a Windows toast.
 //===============================================================================
 
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 using HearingsMessenger.Broadcast;
@@ -26,6 +27,9 @@ var port = builder.Configuration.GetValue("Agent:Port", 7443);
 var certThumbprint = builder.Configuration["Agent:CertThumbprint"];
 var certPath = builder.Configuration["Agent:CertPath"];
 var certPassword = builder.Configuration["Agent:CertPassword"];
+
+// Show a visible on-screen message to logged-in users when a broadcast arrives (default on).
+var showPopup = builder.Configuration.GetValue("Agent:ShowPopup", true);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -65,6 +69,38 @@ static X509Certificate2 LoadCertificateByThumbprint(string thumbprint)
     }
 
     return matches[0];
+}
+
+// Deliver a visible message to interactive sessions. A Session-0 service can't draw UI in
+// a user's desktop directly, so we use Windows' built-in msg.exe (Terminal Services), which
+// shows a message box from Session 0 to every logged-in session. Best-effort and non-blocking.
+static void NotifyLoggedInUsers(BroadcastNotification notification, ILogger logger)
+{
+    var body = string.IsNullOrWhiteSpace(notification.Sender)
+        ? notification.Body
+        : $"{notification.Body}\n\n- {notification.Sender}";
+    var text = $"[{notification.Severity}] {notification.Title}\n\n{body}";
+
+    try
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = "msg.exe",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+        psi.ArgumentList.Add("*");          // every interactive session on this machine
+        psi.ArgumentList.Add("/TIME:120");  // auto-dismiss after 120s if the user ignores it
+        psi.ArgumentList.Add(text);
+
+        // Fire-and-forget: don't wait, keep the HTTP response fast. Disposing the wrapper
+        // does not terminate the launched msg.exe.
+        Process.Start(psi)?.Dispose();
+    }
+    catch (Exception exception)
+    {
+        logger.LogWarning(exception, "Broadcast {Id}: failed to display on-screen message via msg.exe.", notification.Id);
+    }
 }
 
 // --- Windows integrated authentication (Kerberos/Negotiate) ---
@@ -107,8 +143,10 @@ app.MapPost("/api/notifications", (
             notification.Id, caller, notification.Severity, notification.Title,
             notification.Body, notification.Sender ?? "(none)");
 
-        // TODO (Pilot Phase 6.4): show a Windows toast to the logged-in user here
-        // (Windows App SDK / a toast library), or republish on a local ITinyMessengerHub.
+        if (showPopup)
+        {
+            NotifyLoggedInUsers(notification, logger);
+        }
 
         return Results.Ok();
     })

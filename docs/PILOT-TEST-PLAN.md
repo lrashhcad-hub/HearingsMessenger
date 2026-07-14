@@ -6,6 +6,12 @@ Windows 11 workstations**, using the recommended `HttpAgentBroadcastTransport`.
 > **Scope:** a *pilot* (2–3 machines), not a production rollout. Prefer per-machine
 > manual setup here; convert to GPO/Intune/AD CS automation only once the pilot works.
 
+> **✅ Pilot status (executed & verified):** both halves now exist in this repo
+> (`HearingsMessenger.SendTest` publisher, `HearingsMessenger.Agent` receiver). The full path —
+> publisher → HTTPS (AD CS cert) → Kerberos/NTLM auth → agent → **on-screen popup** — has been
+> verified end-to-end on a domain-joined VM. This document remains the reusable runbook for
+> standing up additional machines; step-by-step install/usage is in [`../INSTRUCTIONS.md`](../INSTRUCTIONS.md).
+
 ---
 
 ## The two pieces you must have
@@ -13,10 +19,9 @@ Windows 11 workstations**, using the recommended `HttpAgentBroadcastTransport`.
 The library is only the **sender-side** half. A broadcast is an HTTPS POST of a JSON
 `BroadcastNotification` to `https://<host>:7443/api/notifications`. So you need:
 
-1. **A publisher app** (you write a small console app that references this library). ✅ easy.
-2. **A receiving agent on each workstation** that listens on that endpoint. ❌ **does not
-   exist yet — this is the critical path.** Nothing can be tested on real machines until
-   it exists.
+1. **A publisher app** — provided: `HearingsMessenger.SendTest`. ✅
+2. **A receiving agent on each workstation** that listens on that endpoint — provided:
+   `HearingsMessenger.Agent`. ✅ (Originally the critical path; now built, deployed, and verified.)
 
 ### ⚠️ The #1 testing pitfall (from the transport's contract)
 

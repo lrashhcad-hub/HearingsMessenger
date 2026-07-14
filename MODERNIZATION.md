@@ -174,9 +174,11 @@ logging framework is forced on consumers.
   `Metadata` for ad-hoc data (receiving agents ignore unknown fields).
 - **Two-way needs (acks, targeting queries)**: out of scope by design — build a separate
   request/response service; don't bend the broadcast contract.
-- **Receiving agent**: a pilot **scaffold** is now included at
-  `src/HearingsMessenger/HearingsMessenger.Agent` — an ASP.NET Core minimal API hosted as a
-  Windows Service that accepts the POSTs with Negotiate auth and logs them (log-only; a
-  Windows toast is a later phase). It reuses the library's `BroadcastNotification` so the wire
-  contract cannot drift. See `docs/PILOT-TEST-PLAN.md` and the agent's own README. It remains a
-  separately deployable service, not something the library depends on.
+- **Receiving agent**: included at `src/HearingsMessenger/HearingsMessenger.Agent` — an ASP.NET
+  Core minimal API hosted as a Windows Service that accepts the POSTs with Negotiate auth, serves
+  HTTPS from an AD CS server cert (by thumbprint) or a PFX, and shows each notification on-screen
+  to logged-in users via `msg.exe` (toggle `Agent:ShowPopup`). It reuses the library's
+  `BroadcastNotification` so the wire contract cannot drift, and has been verified end-to-end on a
+  domain-joined VM. See `INSTRUCTIONS.md`, `docs/PILOT-TEST-PLAN.md`, and the agent's own README. It
+  remains a separately deployable service, not something the library depends on. A true Action
+  Center toast (vs. the `msg.exe` message box) would need a helper launched into the user session.
